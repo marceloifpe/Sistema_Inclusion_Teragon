@@ -4,6 +4,7 @@ import 'package:flutter/src/widgets/placeholder.dart';
 import 'user.dart';
 import 'user_provider.dart';
 
+
 class UserList extends StatelessWidget {
   const UserList({super.key});
 
@@ -34,13 +35,32 @@ class UserList extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        onPressed: () {
-                          userProvider.userSelected = users [indexBuilder];
-                          userProvider.indexUser = indexBuilder;
-                        Navigator.popAndPushNamed(context, "/create");
-                      },
-                       icon: Icon(Icons.edit)
-                      )
+                          onPressed: () {
+                            userProvider.userSelected = users[indexBuilder];
+                            userProvider.indexUser = indexBuilder;
+                            Navigator.popAndPushNamed(context, "/create");
+                          },
+                          icon: Icon(Icons.edit)),
+                      IconButton(
+                          onPressed: () {
+                            userProvider.userSelected = users[indexBuilder];
+                            userProvider.indexUser = indexBuilder;
+                            Navigator.popAndPushNamed(context, "/view");
+                          },
+                          icon: Icon(
+                            Icons.visibility,
+                            color: Colors.blue,
+                          )),
+                      IconButton(
+                          onPressed: () {
+                            userProvider.indexUser = null;
+                            userProvider.users.removeAt(indexBuilder); // CORRIGIDO
+                            Navigator.popAndPushNamed(context, "/create");
+                          },
+                          icon: Icon(
+                            Icons.delete,
+                            color: Colors.red,
+                          )),
                     ],
                   ),
                 ),
