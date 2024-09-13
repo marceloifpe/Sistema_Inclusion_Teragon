@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:flutter_application_1/container_all.dart';
 import 'user.dart';
 import 'user_provider.dart';
 
@@ -26,47 +27,49 @@ class UserList extends StatelessWidget {
           },
         ),
       ),
-      body: ListView.builder(
-          itemCount: usersLength,
-          itemBuilder: (BuildContext contextBuilder, indexBuilder) => Container(
-                child: ListTile(
-                  title: Text(users[indexBuilder].name),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                          onPressed: () {
-                            userProvider.userSelected = users[indexBuilder];
-                            userProvider.indexUser = indexBuilder;
-                            Navigator.popAndPushNamed(context, "/create");
-                          },
-                          icon: Icon(Icons.edit)),
-                      IconButton(
-                          onPressed: () {
-                            userProvider.userSelected = users[indexBuilder];
-                            userProvider.indexUser = indexBuilder;
-                            Navigator.popAndPushNamed(context, "/view");
-                          },
-                          icon: Icon(
-                            Icons.visibility,
-                            color: Colors.blue,
-                          )),
-                      IconButton(
-                          onPressed: () {
-                            userProvider.indexUser = null;
-                            userProvider.users.removeAt(indexBuilder); // CORRIGIDO
-                            Navigator.popAndPushNamed(context, "/create");
-                          },
-                          icon: Icon(
-                            Icons.delete,
-                            color: Colors.red,
-                          )),
-                    ],
+      body: ContainerAll(
+        child: ListView.builder(
+            itemCount: usersLength,
+            itemBuilder: (BuildContext contextBuilder, indexBuilder) => Container(
+                  child: ListTile(
+                    title: Text(users[indexBuilder].name),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                            onPressed: () {
+                              userProvider.userSelected = users[indexBuilder];
+                              userProvider.indexUser = indexBuilder;
+                              Navigator.popAndPushNamed(context, "/create");
+                            },
+                            icon: Icon(Icons.edit)),
+                        IconButton(
+                            onPressed: () {
+                              userProvider.userSelected = users[indexBuilder];
+                              userProvider.indexUser = indexBuilder;
+                              Navigator.popAndPushNamed(context, "/view");
+                            },
+                            icon: Icon(
+                              Icons.visibility,
+                              color: Colors.blue,
+                            )),
+                        IconButton(
+                            onPressed: () {
+                              userProvider.indexUser = null;
+                              userProvider.users.removeAt(indexBuilder); // CORRIGIDO
+                              Navigator.popAndPushNamed(context, "/create");
+                            },
+                            icon: Icon(
+                              Icons.delete,
+                              color: Colors.red,
+                            )),
+                      ],
+                    ),
                   ),
-                ),
-                decoration: BoxDecoration(
-                    border: Border(bottom: BorderSide(width: 0.4))),
-              )),
+                  decoration: BoxDecoration(
+                      border: Border(bottom: BorderSide(width: 0.4))),
+                )),
+      ),
     );
   }
 }

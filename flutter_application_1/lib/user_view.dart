@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/container_all.dart';
 import 'package:flutter_application_1/field_form.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
@@ -46,57 +47,62 @@ class UserView extends StatelessWidget {
           )
         ],
       ),
-      body: Center(
-        child: Column(
-          children: [
-            FieldForm(
-              label: 'Name',
-              isPassword: false,
-              controller: controllerName,
-              isForm: false,
-            ),
-            FieldForm(
-              label: 'E-mail',
-              isPassword: false,
-              controller: controllerEmail,
-              isForm: false,
-            ),
-            FieldForm(
-              label: 'Password',
-              isPassword: false,
-              controller: controllerPassword,
-              isForm: false,
-            ),
-            SizedBox(
-              width: double.infinity,
-              child: TextButton(
-                onPressed: () {
-                  Navigator.popAndPushNamed(context, "/create");
-                },
-                child: Text('Edit'),
-                style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all(
-                      Theme.of(context).primaryColor),
-                  foregroundColor: MaterialStateProperty.all(Colors.white),
+      body: ContainerAll(
+        child: Center(
+          child: Column(
+            children: [
+              FieldForm(
+                label: 'Name',
+                isPassword: false,
+                controller: controllerName,
+                isForm: false,
+                isEmail: false,
+              ),
+              FieldForm(
+                label: 'E-mail',
+                isPassword: false,
+                controller: controllerEmail,
+                isForm: false,
+                isEmail: false,
+              ),
+              FieldForm(
+                label: 'Password',
+                isPassword: false,
+                controller: controllerPassword,
+                isForm: false,
+                isEmail: false,
+              ),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.popAndPushNamed(context, "/create");
+                  },
+                  child: Text('Edit'),
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(
+                        Theme.of(context).primaryColor),
+                    foregroundColor: MaterialStateProperty.all(Colors.white),
+                  ),
                 ),
               ),
-            ),
-            SizedBox(
-              width: double.infinity,
-              child: TextButton(
-                onPressed: () {
-                  userProvider.indexUser = null;
-                  userProvider.users.removeAt(chave!);
-                  Navigator.popAndPushNamed(context, "/create");
-                },
-                child: Text('Delete'),
-                style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all(Colors.red),
-                  foregroundColor: MaterialStateProperty.all(Colors.white),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: () {
+                    userProvider.indexUser = null;
+                    userProvider.users.removeAt(chave!);
+                    Navigator.popAndPushNamed(context, "/create");
+                  },
+                  child: Text('Delete'),
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Colors.red),
+                    foregroundColor: MaterialStateProperty.all(Colors.white),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
