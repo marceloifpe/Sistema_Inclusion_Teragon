@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 
-class FieldForm extends StatelessWidget {
+class FieldForm extends StatefulWidget {
   final String label;
   final bool isPassword;
   final TextEditingController controller;
@@ -21,38 +21,56 @@ class FieldForm extends StatelessWidget {
   });
 
   @override
+  _FieldFormState createState() => _FieldFormState();
+}
+
+class _FieldFormState extends State<FieldForm> {
+  bool _obscureText = true; // Controle de visibilidade do texto da senha
+
+  @override
   Widget build(BuildContext context) {
     return TextFormField(
-      enabled: this.isForm,
-      obscureText: isPassword,
-      controller: controller,
+      enabled: widget.isForm,
+      obscureText: widget.isPassword ? _obscureText : false, // Alterna a visibilidade da senha
+      controller: widget.controller,
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.white,
-        labelText: label,
+        labelText: widget.label,
+        suffixIcon: widget.isPassword
+            ? IconButton(
+                icon: Icon(
+                  _obscureText ? Icons.visibility : Icons.visibility_off,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _obscureText = !_obscureText; // Alterna entre mostrar/esconder a senha
+                  });
+                },
+              )
+            : null, // Adiciona o botão de visibilidade apenas para campos de senha
       ),
       validator: (value) {
-        // Verifica se o campo está vazio ou nulo
         if (value == null || value.isEmpty) {
           return 'Este campo não pode ficar vazio';
         }
 
         // Validação de e-mail
-        if (this.isEmail) {
+        if (widget.isEmail) {
           if (!value.contains("@") || !value.contains(".")) {
             return 'Digite um Email Válido com domínio';
           }
         }
 
         // Validação de confirmação de senha
-        if (isPassword && passwordController != null) {
-          if (value != passwordController!.text) {
+        if (widget.isPassword && widget.passwordController != null) {
+          if (value != widget.passwordController!.text) {
             return 'As senhas não coincidem';
           }
         }
 
         // Validação de criação de senha
-        if (isPassword && passwordController == null) {
+        if (widget.isPassword && widget.passwordController == null) {
           if (value.length < 8) {
             return 'A senha deve ter no mínimo 8 caracteres';
           }
