@@ -3,20 +3,20 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 
 class FieldForm extends StatelessWidget {
-  String label;
-  bool isPassword;
-  TextEditingController controller;
-  bool? isForm = true;
-  bool isEmail = false;
-  TextEditingController? passwordController; // Controlador opcional para comparar senhas
+  final String label;
+  final bool isPassword;
+  final TextEditingController controller;
+  final bool? isForm;
+  final bool isEmail;
+  final TextEditingController? passwordController; // Controlador opcional para comparar senhas
 
   FieldForm({
     required this.label,
     required this.isPassword,
     required this.controller,
-    this.isForm,
+    this.isForm = true,
     required this.isEmail,
-    this.passwordController, // Recebe o controlador da senha original
+    this.passwordController, // Recebe o controlador da senha original para comparar
     super.key,
   });
 
@@ -32,19 +32,27 @@ class FieldForm extends StatelessWidget {
         labelText: label,
       ),
       validator: (value) {
+        // Verifica se o campo está vazio ou nulo
         if (value == null || value.isEmpty) {
           return 'Este campo não pode ficar vazio';
         }
 
+        // Validação de e-mail
         if (this.isEmail) {
           if (!value.contains("@") || !value.contains(".")) {
             return 'Digite um Email Válido com domínio';
           }
-        } else if (isPassword && passwordController != null) {
+        }
+
+        // Validação de confirmação de senha
+        if (isPassword && passwordController != null) {
           if (value != passwordController!.text) {
             return 'As senhas não coincidem';
           }
-        } else if (isPassword) {
+        }
+
+        // Validação de criação de senha
+        if (isPassword && passwordController == null) {
           if (value.length < 8) {
             return 'A senha deve ter no mínimo 8 caracteres';
           }

@@ -21,7 +21,7 @@ class _UserFormState extends State<UserForm> {
   TextEditingController controllerName = TextEditingController();
   TextEditingController controllerEmail = TextEditingController();
   TextEditingController controllerPassword = TextEditingController();
-  TextEditingController controllerConfirmPassword = TextEditingController(); // Novo campo de confirmação
+  TextEditingController controllerConfirmPassword = TextEditingController(); // Novo campo para confirmação de senha
 
   @override
   Widget build(BuildContext context) {
@@ -32,23 +32,35 @@ class _UserFormState extends State<UserForm> {
       controllerName.text = userProvider.userSelected!.name;
       controllerEmail.text = userProvider.userSelected!.email;
       controllerPassword.text = userProvider.userSelected!.password;
-      controllerConfirmPassword.text = userProvider.userSelected!.password; // Preencher a confirmação também
-
+      controllerConfirmPassword.text = userProvider.userSelected!.password; // Preenche a confirmação
       setState(() {
         this.title = "Edit User";
       });
     }
 
     GlobalKey<FormState> _key = GlobalKey();
-    
+
     void save() {
       final isValidate = _key.currentState?.validate();
       if (isValidate == false) {
         return;
       }
+
+      // Verifica se a senha e a confirmação de senha coincidem
+      if (controllerPassword.text != controllerConfirmPassword.text) {
+        // Exibe uma mensagem de erro se as senhas não coincidirem
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('As senhas não coincidem!'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
       _key.currentState?.save();
 
-      // Instancia da classe User para criar um novo usuário
+      // Instancia da classe User um novo usuário
       User user = User(
         name: controllerName.text,
         email: controllerEmail.text,
@@ -56,13 +68,16 @@ class _UserFormState extends State<UserForm> {
       );
 
       if (chave != null) {
-        // Editar usuário existente
+        // Editar
         userProvider.users[chave] = user;
       } else {
         int usersLength = userProvider.users.length;
+
         // Salva um novo usuário
         userProvider.users.insert(usersLength, user);
       }
+
+      // Navega de volta para a lista de usuários
       Navigator.popAndPushNamed(context, "/list");
     }
 
@@ -110,7 +125,7 @@ class _UserFormState extends State<UserForm> {
                   isEmail: false,
                 ),
                 FieldForm(
-                  label: 'Confirm Password', // Campo de confirmação de senha
+                  label: 'Confirm Password', // Campo para confirmar senha
                   isPassword: true,
                   controller: controllerConfirmPassword,
                   isEmail: false,
