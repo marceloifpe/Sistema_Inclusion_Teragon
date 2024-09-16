@@ -49,7 +49,7 @@ class _CreateNoteState extends State<CreateNote> {
   void _saveNote() {
     if (formKey.currentState!.validate()) {
       final eventDate = selectedDate != null
-          ? DateFormat('yyyy-MM-dd').format(selectedDate!)
+          ? DateFormat('dd/MM/yyyy').format(selectedDate!)
           : null;
       final eventTime = selectedTime != null
           ? selectedTime!.format(context)
@@ -118,7 +118,7 @@ class _CreateNoteState extends State<CreateNote> {
                     child: ListTile(
                       title: Text(selectedDate == null
                           ? 'Selecione uma Data'
-                          : 'Data: ${DateFormat('dd-MM-yyyy').format(selectedDate!)}'),
+                          : 'Data: ${DateFormat('dd/MM/yyyy').format(selectedDate!)}'),
                       trailing: Icon(Icons.calendar_today),
                       onTap: _selectDate,
                     ),
