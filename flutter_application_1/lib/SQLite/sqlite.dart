@@ -12,7 +12,9 @@ class DatabaseHelper {
       noteId INTEGER PRIMARY KEY AUTOINCREMENT,
       noteTitle TEXT NOT NULL,
       noteContent TEXT NOT NULL,
-      createdAt TEXT DEFAULT CURRENT_TIMESTAMP
+      createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+      eventDate TEXT,
+      eventTime TEXT
     )
   """;
 
@@ -33,36 +35,41 @@ class DatabaseHelper {
 
     return openDatabase(
       path,
-      version: 2, // Atualize a versão para refletir a mudança
+      version: 4, // Atualize a versão para refletir a mudança
       onCreate: (db, version) async {
         await db.execute(usersTable);
         await db.execute(noteTable);
       },
-      onUpgrade: (db, oldVersion, newVersion) async {
-        if (oldVersion < 2) {
-          // Verifica se a coluna já existe antes de tentar adicioná-la
-          var result = await db.rawQuery('PRAGMA table_info(users)');
-          bool columnExists = result.any((column) => column['name'] == 'usrName');
-          if (!columnExists) {
-            await db.execute('ALTER TABLE users ADD COLUMN usrName TEXT');
-          }
-        }
-      },
+      onUpgrade: _onUpgrade, // Atualize para usar a função modificada
     );
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 4) {
+      // Verifica se a coluna 'eventDate' não existe antes de adicioná-la
+      final columns = await db.rawQuery('PRAGMA table_info(notes)');
+      final hasEventDate = columns.any((column) => column['name'] == 'eventDate');
+      if (!hasEventDate) {
+        await db.execute('ALTER TABLE notes ADD COLUMN eventDate TEXT');
+      }
+      final hasEventTime = columns.any((column) => column['name'] == 'eventTime');
+      if (!hasEventTime) {
+        await db.execute('ALTER TABLE notes ADD COLUMN eventTime TEXT');
+      }
+    }
   }
 
   // Método de Login utilizando usrEmail e usrPassword
   Future<bool> login(Users user) async {
     final Database db = await initDB();
-
     var result = await db.rawQuery(
-        "SELECT * FROM users WHERE usrEmail = ? AND usrPassword = ?",
-        [user.usrEmail, user.usrPassword]);
-
+      "SELECT * FROM users WHERE usrEmail = ? AND usrPassword = ?",
+      [user.usrEmail, user.usrPassword],
+    );
     return result.isNotEmpty;
   }
 
-  // Método de cadastro, agora incluindo os novos campos
+  // Método de cadastro
   Future<int> signup(Users user) async {
     final Database db = await initDB();
     return db.insert('users', user.toMap());
@@ -72,7 +79,9 @@ class DatabaseHelper {
   Future<List<NoteModel>> searchNotes(String keyword) async {
     final Database db = await initDB();
     List<Map<String, Object?>> searchResult = await db.rawQuery(
-        "SELECT * FROM notes WHERE noteTitle LIKE ?", ["%$keyword%"]);
+      "SELECT * FROM notes WHERE noteTitle LIKE ?",
+      ["%$keyword%"],
+    );
     return searchResult.map((e) => NoteModel.fromMap(e)).toList();
   }
 
@@ -81,7 +90,7 @@ class DatabaseHelper {
   // Criar nota
   Future<int> createNote(NoteModel note) async {
     final Database db = await initDB();
-    return db.insert('notes', note.toMap());
+    return db.insert('notes', note.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   // Buscar todas as notas
@@ -98,10 +107,13 @@ class DatabaseHelper {
   }
 
   // Atualizar nota
-  Future<int> updateNote(String title, String content, int noteId) async {
+  Future<int> updateNote(NoteModel note) async {
     final Database db = await initDB();
-    return db.rawUpdate(
-        'UPDATE notes SET noteTitle = ?, noteContent = ? WHERE noteId = ?',
-        [title, content, noteId]);
+    return db.update(
+      'notes',
+      note.toMap(),
+      where: 'noteId = ?',
+      whereArgs: [note.noteId],
+    );
   }
 }

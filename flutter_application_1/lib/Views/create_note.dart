@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/JsonModels/note_model.dart';
 import 'package:flutter_application_1/SQLite/sqlite.dart';
+import 'package:intl/intl.dart';
 
 class CreateNote extends StatefulWidget {
   const CreateNote({super.key});
@@ -10,33 +11,72 @@ class CreateNote extends StatefulWidget {
 }
 
 class _CreateNoteState extends State<CreateNote> {
-  final title = TextEditingController();
-  final content = TextEditingController();
+  final titleController = TextEditingController();
+  final contentController = TextEditingController();
   final formKey = GlobalKey<FormState>();
 
+  DateTime? selectedDate;
+  TimeOfDay? selectedTime;
+
   final db = DatabaseHelper();
+
+  Future<void> _selectDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = picked;
+      });
+    }
+  }
+
+  Future<void> _selectTime() async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (picked != null && picked != selectedTime) {
+      setState(() {
+        selectedTime = picked;
+      });
+    }
+  }
+
+  void _saveNote() {
+    if (formKey.currentState!.validate()) {
+      final eventDate = selectedDate != null
+          ? DateFormat('yyyy-MM-dd').format(selectedDate!)
+          : null;
+      final eventTime = selectedTime != null
+          ? selectedTime!.format(context)
+          : null;
+
+      db.createNote(NoteModel(
+        noteTitle: titleController.text,
+        noteContent: contentController.text,
+        createdAt: DateTime.now().toIso8601String(),
+        eventDate: eventDate,
+        eventTime: eventTime,
+      )).whenComplete(() {
+        Navigator.of(context).pop(true);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Create Note"),
+        title: const Text("Criar Agendamento"),
         actions: [
           IconButton(
-            onPressed: () {
-              if (formKey.currentState!.validate()) {
-                db
-                    .createNote(NoteModel(
-                        noteTitle: title.text,
-                        noteContent: content.text,
-                        createdAt: DateTime.now().toIso8601String()))
-                    .whenComplete(() {
-                  Navigator.of(context).pop(true);
-                });
-              }
-            },
-            icon: const Icon(Icons.check, color: Colors.white), // Cor do ícone
-          )
+            onPressed: _saveNote,
+            icon: const Icon(Icons.check),
+          ),
         ],
       ),
       body: Form(
@@ -47,7 +87,7 @@ class _CreateNoteState extends State<CreateNote> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextFormField(
-                controller: title,
+                controller: titleController,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return "Title is required";
@@ -55,12 +95,12 @@ class _CreateNoteState extends State<CreateNote> {
                   return null;
                 },
                 decoration: const InputDecoration(
-                  labelText: "Title",
+                  labelText: "Nome do Evento",
                 ),
               ),
-              SizedBox(height: 10), // Espaçamento entre os campos
+              SizedBox(height: 10),
               TextFormField(
-                controller: content,
+                controller: contentController,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return "Content is required";
@@ -68,8 +108,31 @@ class _CreateNoteState extends State<CreateNote> {
                   return null;
                 },
                 decoration: const InputDecoration(
-                  labelText: "Content",
+                  labelText: "Descrição",
                 ),
+              ),
+              SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: ListTile(
+                      title: Text(selectedDate == null
+                          ? 'Selecione uma Data'
+                          : 'Data: ${DateFormat('dd-MM-yyyy').format(selectedDate!)}'),
+                      trailing: Icon(Icons.calendar_today),
+                      onTap: _selectDate,
+                    ),
+                  ),
+                  Expanded(
+                    child: ListTile(
+                      title: Text(selectedTime == null
+                          ? 'Selecione um Horário'
+                          : 'Hora: ${selectedTime!.format(context)}'),
+                      trailing: Icon(Icons.access_time),
+                      onTap: _selectTime,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

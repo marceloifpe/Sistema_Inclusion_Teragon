@@ -24,12 +24,7 @@ class _NotesState extends State<Notes> {
   void initState() {
     super.initState();
     handler = DatabaseHelper();
-    notes = handler.getNotes();
-    handler.initDB().whenComplete(() {
-      setState(() {
-        notes = handler.getNotes();
-      });
-    });
+    notes = handler.getNotes(); // Inicializa o Future `notes`
   }
 
   Future<List<NoteModel>> searchNote() {
@@ -38,7 +33,7 @@ class _NotesState extends State<Notes> {
 
   Future<void> _refresh() async {
     setState(() {
-      notes = handler.getNotes();
+      notes = handler.getNotes(); // Atualiza o Future `notes`
     });
   }
 
@@ -53,7 +48,7 @@ class _NotesState extends State<Notes> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Notes"),
+        title: const Text("Agendamentos"),
       ),
       drawer: Drawer(
         child: SafeArea(
@@ -121,7 +116,7 @@ class _NotesState extends State<Notes> {
                   decoration: const InputDecoration(
                     border: InputBorder.none,
                     icon: Icon(Icons.search),
-                    hintText: "Search",
+                    hintText: "Busca",
                   ),
                 ),
               ),
@@ -168,13 +163,13 @@ class _NotesState extends State<Notes> {
                                       TextFormField(
                                         controller: titleController,
                                         decoration: const InputDecoration(
-                                          labelText: "Title",
+                                          labelText: "Nome do Evento",
                                         ),
                                       ),
                                       TextFormField(
                                         controller: contentController,
                                         decoration: const InputDecoration(
-                                          labelText: "Content",
+                                          labelText: "Descrição",
                                         ),
                                       ),
                                     ],
@@ -183,21 +178,26 @@ class _NotesState extends State<Notes> {
                                     TextButton(
                                       onPressed: () {
                                         handler.updateNote(
-                                          titleController.text,
-                                          contentController.text,
-                                          note.noteId!,
+                                          NoteModel(
+                                            noteId: note.noteId,
+                                            noteTitle: titleController.text,
+                                            noteContent: contentController.text,
+                                            createdAt: note.createdAt,
+                                            eventDate: note.eventDate,
+                                            eventTime: note.eventTime,
+                                          ),
                                         ).whenComplete(() {
                                           _refresh();
                                           Navigator.pop(context);
                                         });
                                       },
-                                      child: const Text("Update"),
+                                      child: const Text("Atualizar"),
                                     ),
                                     TextButton(
                                       onPressed: () {
                                         Navigator.pop(context);
                                       },
-                                      child: const Text("Cancel"),
+                                      child: const Text("Cancelar"),
                                     ),
                                   ],
                                 );
