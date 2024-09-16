@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/Authtentication/signup.dart';
 import 'package:flutter_application_1/JsonModels/users.dart';
 import 'package:flutter_application_1/SQLite/sqlite.dart';
-import 'package:flutter_application_1/Views/notes.dart';
+import 'package:flutter_application_1/Views/notes.dart'; // Verifique o caminho para Notes.dart
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,107 +12,94 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final username = TextEditingController();
-  final password = TextEditingController();
-  bool isVisible = false;
-  bool isLoginTrue = false;
-
-  final db = DatabaseHelper();
-
-  login() async {
-    var response = await db
-        .login(Users(usrName: username.text, usrPassword: password.text));
-    if (response == true) {
-      if (!mounted) return;
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => const Notes()));
-    } else {
-      setState(() {
-        isLoginTrue = true;
-      });
-    }
-  }
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
 
   final formKey = GlobalKey<FormState>();
+  bool isVisible = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF93C5FD), // Cor de fundo azul claro
+      backgroundColor: const Color(0xFF93C5FD), // Cor de fundo
       body: Center(
         child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Form(
-              key: formKey,
+          child: Form(
+            key: formKey,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Imagem de login em forma circular
-                  ClipOval(
-                    child: Image.asset(
-                      "lib/assets/login.png",
-                      width: 150,
-                      height: 150,
-                      fit: BoxFit.cover,
+                  // Imagem circular
+                  CircleAvatar(
+                    radius: 105,
+                    backgroundColor: Colors.white, // Cor de fundo da imagem
+                    child: ClipOval(
+                      child: Image.asset(
+                        "lib/assets/login.png", // Verifique o caminho da imagem
+                        width: 210,
+                        height: 210,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 15),
-                  
-                  // Título abaixo da imagem
+                  // Título
                   const Text(
                     "Inclusion Teragon",
-                    textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: 30,
                       fontWeight: FontWeight.bold,
+                      color: Colors.black, // Cor do título
                     ),
                   ),
-                  
-                  const SizedBox(height: 20),
-
-                  // Campo de username
+                  const SizedBox(height: 30), // Espaçamento entre o título e o campo de email
+                  // Campo de email
                   Container(
                     margin: const EdgeInsets.all(8),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
-                      color: Colors.white, // Fundo branco para os campos de texto
+                      color: Colors.white,
                     ),
                     child: TextFormField(
-                      controller: username,
+                      controller: emailController,
                       validator: (value) {
-                        if (value!.isEmpty) {
-                          return "Username is required";
+                        if (value == null || value.isEmpty) {
+                          return "Email é obrigatório";
+                        } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                          return "Digite um email válido";
                         }
                         return null;
                       },
+                      style: const TextStyle(color: Colors.black),
                       decoration: const InputDecoration(
-                        icon: Icon(Icons.person),
+                        icon: Icon(Icons.email),
                         border: InputBorder.none,
-                        hintText: "Nome",
+                        hintText: "Email",
                         hintStyle: TextStyle(color: Colors.grey),
                       ),
                     ),
                   ),
-
                   // Campo de senha
                   Container(
                     margin: const EdgeInsets.all(8),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
-                      color: Colors.white, // Fundo branco para os campos de texto
+                      color: Colors.white,
                     ),
                     child: TextFormField(
-                      controller: password,
+                      controller: passwordController,
                       validator: (value) {
-                        if (value!.isEmpty) {
-                          return "Password is required";
+                        if (value == null || value.isEmpty) {
+                          return "Senha é obrigatória";
                         }
                         return null;
                       },
                       obscureText: !isVisible,
+                      style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(
                         icon: const Icon(Icons.lock),
                         border: InputBorder.none,
@@ -124,64 +111,75 @@ class _LoginScreenState extends State<LoginScreen> {
                               isVisible = !isVisible;
                             });
                           },
-                          icon: Icon(isVisible
-                              ? Icons.visibility
-                              : Icons.visibility_off),
+                          icon: Icon(isVisible ? Icons.visibility : Icons.visibility_off),
                         ),
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 10),
-                  
                   // Botão de login
                   Container(
                     height: 55,
                     width: MediaQuery.of(context).size.width * .9,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
-                      color: const Color(0xFF10B921), // Cor do botão verde
+                      color: const Color(0xFF10B921), // Cor do botão
                     ),
                     child: TextButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (formKey.currentState!.validate()) {
-                          login();
+                          final db = DatabaseHelper();
+                          bool isAuthenticated = await db.login(
+                            Users(
+                              usrEmail: emailController.text,
+                              usrPassword: passwordController.text,
+                              usrName: '', // Campo não utilizado
+                              usrBirthDate: '', // Campos não utilizados
+                              usrTeaDegree: '', // Campos não utilizados
+                            ),
+                          );
+
+                          if (isAuthenticated) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const Notes()), // Navegação para Notes
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Credenciais inválidas"),
+                              ),
+                            );
+                          }
                         }
                       },
                       child: const Text(
-                        "LOGIN",
+                        "Entrar",
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
                   ),
-
                   // Link para cadastro
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text("Don't have an account?"),
+                      const Text("Não tem uma conta?"),
                       TextButton(
                         onPressed: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const SignUp()));
+                                builder: (context) => const SignUp()),
+                          );
                         },
                         child: const Text(
-                          "Cadastre-se",
-                          style: TextStyle(color: Color(0xFF10B981)), // Cor verde no texto
+                          "Cadastrar",
+                          style: TextStyle(color: Color(0xFF10B981)), // Cor do link de cadastro
                         ),
                       ),
                     ],
                   ),
-
-                  // Mensagem de erro ao fazer login
-                  isLoginTrue
-                      ? const Text(
-                          "Username or password is incorrect",
-                          style: TextStyle(color: Colors.red),
-                        )
-                      : const SizedBox(),
                 ],
               ),
             ),

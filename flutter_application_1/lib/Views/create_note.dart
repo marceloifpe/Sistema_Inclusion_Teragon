@@ -15,65 +15,66 @@ class _CreateNoteState extends State<CreateNote> {
   final formKey = GlobalKey<FormState>();
 
   final db = DatabaseHelper();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Create note"),
+        title: const Text("Create Note"),
         actions: [
           IconButton(
-              onPressed: () {
-                //Add Note button
-                //We should not allow empty data to the database
-                if (formKey.currentState!.validate()) {
-                  db
-                      .createNote(NoteModel(
-                          noteTitle: title.text,
-                          noteContent: content.text,
-                          createdAt: DateTime.now().toIso8601String()))
-                      .whenComplete(() {
-                    //When this value is true
-                    Navigator.of(context).pop(true);
-                  });
-                }
-              },
-              icon: Icon(Icons.check))
+            onPressed: () {
+              if (formKey.currentState!.validate()) {
+                db
+                    .createNote(NoteModel(
+                        noteTitle: title.text,
+                        noteContent: content.text,
+                        createdAt: DateTime.now().toIso8601String()))
+                    .whenComplete(() {
+                  Navigator.of(context).pop(true);
+                });
+              }
+            },
+            icon: const Icon(Icons.check, color: Colors.white), // Cor do ícone
+          )
         ],
       ),
       body: Form(
-          //I forgot to specify key
-          key: formKey,
-          child: Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Column(
-              children: [
-                TextFormField(
-                  controller: title,
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return "Title is required";
-                    }
-                    return null;
-                  },
-                  decoration: const InputDecoration(
-                    label: Text("Title"),
-                  ),
+        key: formKey,
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextFormField(
+                controller: title,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Title is required";
+                  }
+                  return null;
+                },
+                decoration: const InputDecoration(
+                  labelText: "Title",
                 ),
-                TextFormField(
-                  controller: content,
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return "Content is required";
-                    }
-                    return null;
-                  },
-                  decoration: const InputDecoration(
-                    label: Text("Content"),
-                  ),
+              ),
+              SizedBox(height: 10), // Espaçamento entre os campos
+              TextFormField(
+                controller: content,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Content is required";
+                  }
+                  return null;
+                },
+                decoration: const InputDecoration(
+                  labelText: "Content",
                 ),
-              ],
-            ),
-          )),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

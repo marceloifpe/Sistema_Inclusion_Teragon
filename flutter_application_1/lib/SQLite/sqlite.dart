@@ -4,88 +4,104 @@ import 'package:flutter_application_1/JsonModels/note_model.dart';
 import 'package:flutter_application_1/JsonModels/users.dart';
 
 class DatabaseHelper {
-  final databaseName = "notes.db";
-  String noteTable =
-      "CREATE TABLE notes (noteId INTEGER PRIMARY KEY AUTOINCREMENT, noteTitle TEXT NOT NULL, noteContent TEXT NOT NULL, createdAt TEXT DEFAULT CURRENT_TIMESTAMP)";
+  final databaseName = "app_database.db"; // Nome do banco de dados
 
-  //Now we must create our user table into our sqlite db
+  // Criação da tabela de notas
+  String noteTable = """
+    CREATE TABLE notes (
+      noteId INTEGER PRIMARY KEY AUTOINCREMENT,
+      noteTitle TEXT NOT NULL,
+      noteContent TEXT NOT NULL,
+      createdAt TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+  """;
 
-  String users =
-      "create table users (usrId INTEGER PRIMARY KEY AUTOINCREMENT, usrName TEXT UNIQUE, usrPassword TEXT)";
-
-  //We are done in this section
+  // Criação da tabela de usuários
+  String usersTable = """
+    CREATE TABLE users (
+      usrId INTEGER PRIMARY KEY AUTOINCREMENT,
+      usrEmail TEXT UNIQUE NOT NULL,
+      usrPassword TEXT NOT NULL,
+      usrBirthDate TEXT,
+      usrTeaDegree TEXT
+    )
+  """;
 
   Future<Database> initDB() async {
     final databasePath = await getDatabasesPath();
     final path = join(databasePath, databaseName);
 
-    return openDatabase(path, version: 1, onCreate: (db, version) async {
-      await db.execute(users);
-      await db.execute(noteTable);
-    });
+    return openDatabase(
+      path,
+      version: 2, // Atualize a versão para refletir a mudança
+      onCreate: (db, version) async {
+        await db.execute(usersTable);
+        await db.execute(noteTable);
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          // Verifica se a coluna já existe antes de tentar adicioná-la
+          var result = await db.rawQuery('PRAGMA table_info(users)');
+          bool columnExists = result.any((column) => column['name'] == 'usrName');
+          if (!columnExists) {
+            await db.execute('ALTER TABLE users ADD COLUMN usrName TEXT');
+          }
+        }
+      },
+    );
   }
 
-  //Now we create login and sign up method
-  //as we create sqlite other functionality in our previous video
-
-  //IF you didn't watch my previous videos, check part 1 and part 2
-
-  //Login Method
-
+  // Método de Login utilizando usrEmail e usrPassword
   Future<bool> login(Users user) async {
     final Database db = await initDB();
 
-    // I forgot the password to check
     var result = await db.rawQuery(
-        "select * from users where usrName = '${user.usrName}' AND usrPassword = '${user.usrPassword}'");
-    if (result.isNotEmpty) {
-      return true;
-    } else {
-      return false;
-    }
+        "SELECT * FROM users WHERE usrEmail = ? AND usrPassword = ?",
+        [user.usrEmail, user.usrPassword]);
+
+    return result.isNotEmpty;
   }
 
-  //Sign up
+  // Método de cadastro, agora incluindo os novos campos
   Future<int> signup(Users user) async {
     final Database db = await initDB();
-
     return db.insert('users', user.toMap());
   }
 
-  //Search Method
+  // Método de busca por notas
   Future<List<NoteModel>> searchNotes(String keyword) async {
     final Database db = await initDB();
-    List<Map<String, Object?>> searchResult = await db
-        .rawQuery("select * from notes where noteTitle LIKE ?", ["%$keyword%"]);
+    List<Map<String, Object?>> searchResult = await db.rawQuery(
+        "SELECT * FROM notes WHERE noteTitle LIKE ?", ["%$keyword%"]);
     return searchResult.map((e) => NoteModel.fromMap(e)).toList();
   }
 
-  //CRUD Methods
+  // Métodos CRUD para notas
 
-  //Create Note
+  // Criar nota
   Future<int> createNote(NoteModel note) async {
     final Database db = await initDB();
     return db.insert('notes', note.toMap());
   }
 
-  //Get notes
+  // Buscar todas as notas
   Future<List<NoteModel>> getNotes() async {
     final Database db = await initDB();
     List<Map<String, Object?>> result = await db.query('notes');
     return result.map((e) => NoteModel.fromMap(e)).toList();
   }
 
-  //Delete Notes
+  // Deletar nota
   Future<int> deleteNote(int id) async {
     final Database db = await initDB();
     return db.delete('notes', where: 'noteId = ?', whereArgs: [id]);
   }
 
-  //Update Notes
-  Future<int> updateNote(title, content, noteId) async {
+  // Atualizar nota
+  Future<int> updateNote(String title, String content, int noteId) async {
     final Database db = await initDB();
     return db.rawUpdate(
-        'update notes set noteTitle = ?, noteContent = ? where noteId = ?',
+        'UPDATE notes SET noteTitle = ?, noteContent = ? WHERE noteId = ?',
         [title, content, noteId]);
   }
 }

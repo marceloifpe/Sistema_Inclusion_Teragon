@@ -11,19 +11,37 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
-  final username = TextEditingController();
-  final password = TextEditingController();
-  final confirmPassword = TextEditingController();
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+  final birthDateController = TextEditingController();
+  String? teaDegree = 'Grau 1'; // Valor inicial para o dropdown
+  DateTime? selectedDate;
 
   final formKey = GlobalKey<FormState>();
+  bool isPasswordVisible = false;
+  bool isConfirmPasswordVisible = false;
 
-  bool isVisible = false;
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate ?? DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = picked;
+        birthDateController.text = "${picked.toLocal().day}/${picked.toLocal().month}/${picked.toLocal().year}";
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Definir a cor de fundo da tela
-      backgroundColor: const Color(0xFF93C5FD), 
+      backgroundColor: const Color(0xFF93C5FD),
       body: Center(
         child: SingleChildScrollView(
           child: Form(
@@ -33,36 +51,65 @@ class _SignUpState extends State<SignUp> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const ListTile(
-                    title: Text(
-                      "Registrar Nova Conta",
-                      textAlign: TextAlign.center, 
-                      style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold),
+                  // Título
+                  const Text(
+                    "Registrar Nova Conta",
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black, // Cor do título
                     ),
                   ),
+                  const SizedBox(height: 30), // Espaçamento entre o título e o campo de nome
 
-                  // Campo de username
+                  // Campo de nome
                   Container(
                     margin: const EdgeInsets.all(8),
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
-                      color: Colors.white, // Fundo branco para o campo de texto
+                      color: Colors.white,
                     ),
                     child: TextFormField(
-                      controller: username,
+                      controller: nameController,
                       validator: (value) {
                         if (value!.isEmpty) {
-                          return "Username is required";
+                          return "Nome é obrigatório";
                         }
                         return null;
                       },
-                      style: const TextStyle(color: Colors.black), // Cor da fonte preta
                       decoration: const InputDecoration(
                         icon: Icon(Icons.person),
                         border: InputBorder.none,
                         hintText: "Nome",
-                        hintStyle: TextStyle(color: Colors.grey), // Placeholder em cinza
+                        hintStyle: TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                  ),
+
+                  // Campo de email
+                  Container(
+                    margin: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.white,
+                    ),
+                    child: TextFormField(
+                      controller: emailController,
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return "Email é obrigatório";
+                        } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                          return "Digite um email válido";
+                        }
+                        return null;
+                      },
+                      decoration: const InputDecoration(
+                        icon: Icon(Icons.email),
+                        border: InputBorder.none,
+                        hintText: "Email",
+                        hintStyle: TextStyle(color: Colors.grey),
                       ),
                     ),
                   ),
@@ -73,30 +120,29 @@ class _SignUpState extends State<SignUp> {
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
-                      color: Colors.white, // Fundo branco
+                      color: Colors.white,
                     ),
                     child: TextFormField(
-                      controller: password,
+                      controller: passwordController,
                       validator: (value) {
                         if (value!.isEmpty) {
-                          return "Password is required";
+                          return "Senha é obrigatória";
                         }
                         return null;
                       },
-                      obscureText: !isVisible,
-                      style: const TextStyle(color: Colors.black), // Texto em preto
+                      obscureText: !isPasswordVisible,
                       decoration: InputDecoration(
                         icon: const Icon(Icons.lock),
                         border: InputBorder.none,
-                        hintText: "Senha", // Troquei para "Senha"
+                        hintText: "Senha",
                         hintStyle: const TextStyle(color: Colors.grey),
                         suffixIcon: IconButton(
                           onPressed: () {
                             setState(() {
-                              isVisible = !isVisible;
+                              isPasswordVisible = !isPasswordVisible;
                             });
                           },
-                          icon: Icon(isVisible ? Icons.visibility : Icons.visibility_off),
+                          icon: Icon(isPasswordVisible ? Icons.visibility : Icons.visibility_off),
                         ),
                       ),
                     ),
@@ -108,76 +154,140 @@ class _SignUpState extends State<SignUp> {
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
-                      color: Colors.white, // Fundo branco
+                      color: Colors.white,
                     ),
                     child: TextFormField(
-                      controller: confirmPassword,
+                      controller: confirmPasswordController,
                       validator: (value) {
                         if (value!.isEmpty) {
-                          return "Confirm password is required";
-                        } else if (password.text != confirmPassword.text) {
-                          return "Passwords don't match";
+                          return "Confirmação de senha é obrigatória";
+                        } else if (value != passwordController.text) {
+                          return "Senhas não coincidem";
                         }
                         return null;
                       },
-                      obscureText: !isVisible,
-                      style: const TextStyle(color: Colors.black), // Texto em preto
+                      obscureText: !isConfirmPasswordVisible,
                       decoration: InputDecoration(
                         icon: const Icon(Icons.lock),
                         border: InputBorder.none,
-                        hintText: "Confirme a senha", // Troquei para "Confirme a senha"
+                        hintText: "Confirmar Senha",
                         hintStyle: const TextStyle(color: Colors.grey),
                         suffixIcon: IconButton(
                           onPressed: () {
                             setState(() {
-                              isVisible = !isVisible;
+                              isConfirmPasswordVisible = !isConfirmPasswordVisible;
                             });
                           },
-                          icon: Icon(isVisible ? Icons.visibility : Icons.visibility_off),
+                          icon: Icon(isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off),
                         ),
                       ),
                     ),
                   ),
 
-                  const SizedBox(height: 10),
+                  // Campo de data de nascimento
+                  Container(
+                    margin: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.white,
+                    ),
+                    child: TextFormField(
+                      controller: birthDateController,
+                      readOnly: true,
+                      onTap: () => _selectDate(context),
+                      decoration: InputDecoration(
+                        icon: const Icon(Icons.calendar_today),
+                        border: InputBorder.none,
+                        hintText: "Data de Nascimento",
+                        hintStyle: const TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                  ),
 
-                  // Botão de cadastrar
+                  // Campo de grau de TEA (Dropdown)
+                  Container(
+                    margin: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.white,
+                    ),
+                    child: DropdownButtonFormField<String>(
+                      value: teaDegree,
+                      onChanged: (newValue) {
+                        setState(() {
+                          teaDegree = newValue;
+                        });
+                      },
+                      items: <String>['Grau 1', 'Grau 2', 'Grau 3']
+                          .map((degree) => DropdownMenuItem<String>(
+                                value: degree,
+                                child: Text(degree),
+                              ))
+                          .toList(),
+                      decoration: const InputDecoration(
+                        icon: Icon(Icons.accessibility),
+                        border: InputBorder.none,
+                        hintText: "Grau de TEA",
+                        hintStyle: TextStyle(color: Colors.grey),
+                      ),
+                      validator: (value) {
+                        if (value == null) {
+                          return "Grau de TEA é obrigatório";
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Botão de cadastro
                   Container(
                     height: 55,
                     width: MediaQuery.of(context).size.width * .9,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
-                      color: const Color(0xFF10B921), // Cor do botão #10B921
+                      color: const Color(0xFF10B921), // Cor do botão
                     ),
-                    child: TextButton(
-                      onPressed: () {
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF10B921), // Cor de fundo
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: () async {
                         if (formKey.currentState!.validate()) {
                           final db = DatabaseHelper();
-                          db
-                              .signup(Users(
-                                usrName: username.text,
-                                usrPassword: password.text,
-                              ))
-                              .whenComplete(() {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => const LoginScreen()),
-                            );
-                          });
+                          Users newUser = Users(
+                            usrName: nameController.text,
+                            usrEmail: emailController.text,
+                            usrPassword: passwordController.text,
+                            usrBirthDate: birthDateController.text,
+                            usrTeaDegree: teaDegree!,
+                          );
+
+                          await db.signup(newUser);
+
+                          Navigator.pop(context);
                         }
                       },
                       child: const Text(
-                        "Cadastrar", // Nome alterado para "Cadastrar"
+                        "Cadastrar",
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
                   ),
 
+                  const SizedBox(height: 20),
+
                   // Link para login
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text("Já tem uma conta?"),
+                      const Text("Já possui uma conta?"),
                       TextButton(
                         onPressed: () {
                           Navigator.push(
@@ -187,8 +297,8 @@ class _SignUpState extends State<SignUp> {
                         },
                         child: const Text(
                           "Entrar",
-                          style: TextStyle(color: Color(0xFF10B981)),
-                          ),
+                          style: TextStyle(color: Color(0xFF10B981)), // Cor do link de login
+                        ),
                       ),
                     ],
                   ),
