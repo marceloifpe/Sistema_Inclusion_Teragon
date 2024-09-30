@@ -5,4 +5,4 @@ Professor Waldemar Neto.
 Instituição: UABJ.
 Disciplina: Projeto 3 e 4.
 Esse aplicativo desenvolvido visa ajudar pessoas com TEA na entrada e manutenção no mercado de trabalho.
-Tecnologias Usadas: Flutter, Widgets e Firebase.
+Tecnologias Usadas: Flutter frameWork, Back-End Dart, Widgets Front-End e Firebase como Banco de Dados.
