@@ -1,0 +1,38 @@
+name: flutter_application_xy
+description: A new Flutter project.
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  firebase_core: ^3.6.0 
+  cloud_firestore: ^5.4.3
+  firebase_auth: ^5.3.1
+  firebase_analytics: ^11.3.3
+  random_string: ^2.3.1
+  shared_preferences: ^2.3.2
+  
+
+  cupertino_icons: ^1.0.8
+  youtube_player_flutter: ^8.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Para adicionar imagens ou outros ativos ao aplicativo, use a seção assets:
+  assets:
+    - imagens/
+    - jsonFile/videolist.json
+    

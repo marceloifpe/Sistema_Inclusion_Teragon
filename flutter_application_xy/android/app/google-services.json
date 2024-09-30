@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "624607080241",
+    "project_id": "sistemainclusionteragonapp",
+    "storage_bucket": "sistemainclusionteragonapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:624607080241:android:f6aa4ceb23eec05d93ca10",
+        "android_client_info": {
+          "package_name": "com.novo.flutter_application_xy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCrZLFbvIIsbuYMmhz39VL_16Ca_LpfsfM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
